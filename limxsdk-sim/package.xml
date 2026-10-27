@@ -22,8 +22,8 @@
   <license>Apache-2.0</license>
 
   <url type="website">https://www.limxdynamics.com</url>
-  <url type="repository">https://github.com/limx-tron2/tron2-gazebo-ros</url>
-  <url type="bugtracker">https://github.com/limx-tron2/tron2-gazebo-ros/issues</url>
+  <url type="repository">https://github.com/limxdynamics/tron2_gazebo_ros</url>
+  <url type="bugtracker">https://github.com/limxdynamics/tron2_gazebo_ros/issues</url>
 
   <buildtool_depend    condition="$ROS_VERSION == 1">catkin</buildtool_depend>
   <build_depend        condition="$ROS_VERSION == 1">roscpp</build_depend>

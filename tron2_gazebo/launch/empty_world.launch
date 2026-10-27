@@ -7,7 +7,7 @@
     <rosparam file="$(find tron2_gazebo)/config/default_tron2.yaml" command="load"/>
 
     <param name="robot_description"
-           command="xacro $(find robot_description)/tron2/$(arg robot_type)/xacro/robot.urdf.xacro ros_version:=1"/>
+           command="xacro $(find robot_description)/tron2a/$(arg robot_type)/xacro/robot.urdf.xacro ros_version:=1"/>
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="world_name" value="$(find tron2_gazebo)/worlds/empty_world.world"/>

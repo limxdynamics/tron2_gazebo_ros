@@ -30,14 +30,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `*.bag`, `*.mcap`, and — outside `limxsdk-sim/lib/` — `*.so`,
   `*.dll`, `*.dylib`, `*.lib`, `*.whl`).
 
+### Fixed
+- `tron2_gazebo/launch/empty_world.launch`: load the URDF from
+  `robot_description/tron2a/<robot_type>/`, the layout used by
+  `tron2-robot-description`; the old `tron2/` path did not exist there.
+- CI never ran: the workflow listened on `main` (default branch is
+  `master`) and `ci.yml` was not valid YAML (unquoted `: ` in a step
+  name). The doc-marker scan now ignores the grep command quoted in
+  `CONTRIBUTING.md`. The build job, which targeted the retired
+  `ubuntu-20.04` runner and only built this repository, now runs in a
+  `ros:noetic` container, builds the full workspace with
+  `tron2_rl_deploy_ros`, `limxsdk-lowlevel` and `tron2-robot-description`,
+  expands both URDFs and runs a headless Gazebo smoke test.
+- Distribution note (README EN/ZH) points at
+  `github.com/limxdynamics/tron2_gazebo_ros` and no longer names the
+  internal GitLab address.
+- Stale license note in the README: both `package.xml` files declare
+  Apache-2.0 (resolved 2026-07-14). The Scope section links the real
+  sibling repositories instead of the non-existent `limx-tron2`
+  organisation.
+- Repository links in both `package.xml` files, `CONTRIBUTING.md` and the
+  changelog footer point at `limxdynamics/tron2_gazebo_ros`.
+- `.github/CODEOWNERS`: the `@limx-tron2/*` teams do not exist; all paths
+  are owned by `@limxdynamics` until real teams are set up.
+- `THIRD_PARTY_NOTICES.md` §5 lists the new rendered images and records
+  how the existing media were re-encoded.
+
 ### Changed
 - `README.md` / `README_zh-CN.md`: landing page with banner, model
   cards, how-it-works picture, highlights and quick start (new images
   `doc/banner.png`, `doc/model_{sf,wf}.png`, `doc/sim2real_{en,zh}.png`
   rendered from `tron2-robot-description`). Workspace setup now clones
   this repository instead of `tron1-gazebo-ros`, adds
-  `tron2_rl_deploy_ros` and `tron2-robot-description`, and documents the
-  `tron2 -> tron2a` link the launch files need. New sections for the
+  `tron2_rl_deploy_ros` and `tron2-robot-description`. New sections for the
   `tron2_hw_sim.launch` arguments and the gamepad mapping; two FAQ
   entries. "Cite & support" links point at this repository; License,
   Scope and Distribution text unchanged, License and Scope moved to the
@@ -108,5 +133,5 @@ First public release. Contents:
 - ROS 1 (catkin) support in `package.xml` / `CMakeLists.txt`, with
   ROS 2 (`ament_cmake`) blocks kept for future work.
 
-[Unreleased]: https://github.com/limx-tron2/tron2-gazebo-ros/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/limx-tron2/tron2-gazebo-ros/releases/tag/v0.1.0
+[Unreleased]: https://github.com/limxdynamics/tron2_gazebo_ros/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/limxdynamics/tron2_gazebo_ros/releases/tag/v0.1.0

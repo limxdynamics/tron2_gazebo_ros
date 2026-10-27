@@ -1,16 +1,14 @@
 # SPDX-License-Identifier: Apache-2.0
-# NOTE: The SPDX header above documents the license of THIS CI
-# workflow file itself. The two ROS packages in this repository still
-# declare non-open-source `<license>` values (see
-# THIRD_PARTY_NOTICES.md §1). This CI enforces those must be resolved
-# before a public tag.
+# Both ROS packages declare Apache-2.0 (THIRD_PARTY_NOTICES.md §1); the
+# <license> guard below keeps it that way.
 name: ci
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -93,7 +91,7 @@ jobs:
           done
           if [ $bad -ne 0 ]; then exit 1; fi
 
-      - name: Private-IP scan (allowlist: apibase.h placeholder)
+      - name: "Private-IP scan (allowlist: apibase.h placeholder)"
         run: |
           set -e
           # RFC-1918 ranges + link-local 169.254/16. 127.0.0.1 is fine
@@ -117,44 +115,101 @@ jobs:
           # Note: the ⚠ TO CONFIRM markers are intentional in this
           # scaffolding; this check only fails on unqualified strings
           # like "TODO: license" or "confidential".
-          if grep -RniE '(todo: license|unknown license|confidential)' \
-               README.md THIRD_PARTY_NOTICES.md CHANGELOG.md \
-               CONTRIBUTING.md SECURITY.md NOTICE; then
+          # The grep command documented in CONTRIBUTING.md contains the
+          # search terms itself, so lines quoting it are ignored.
+          hits=$(grep -RniE '(todo: license|unknown license|confidential)' \
+                   README.md THIRD_PARTY_NOTICES.md CHANGELOG.md \
+                   CONTRIBUTING.md SECURITY.md NOTICE | \
+                 grep -vE "grep -R[a-zA-Z]* '" || true)
+          if [ -n "$hits" ]; then
+            echo "$hits"
             echo "::error::Unresolved license / confidentiality markers in top-level docs"
             exit 1
           fi
 
   build:
-    name: catkin_make (Noetic + Gazebo 11)
-    runs-on: ubuntu-20.04
+    name: catkin_make + Gazebo smoke test (Noetic, Gazebo 11)
+    runs-on: ubuntu-latest
+    container:
+      image: ros:noetic-ros-base-focal
+      options: --cap-add=NET_ADMIN
+    defaults:
+      run:
+        shell: bash
     steps:
-      - uses: actions/checkout@v4
-        with:
-          path: src/tron2-gazebo-ros
-
-      - name: Install ROS Noetic + Gazebo deps
+      - name: Install build and simulation dependencies
         run: |
           set -e
-          sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-          curl -sSL 'https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc' | sudo apt-key add -
-          sudo apt-get update
-          sudo apt-get install -y \
-            ros-noetic-ros-base \
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            git iproute2 xvfb python3-pygame \
+            ros-noetic-xacro \
             ros-noetic-gazebo-ros-pkgs \
             ros-noetic-gazebo-ros-control \
+            ros-noetic-gazebo-plugins \
             ros-noetic-ros-control \
             ros-noetic-ros-controllers \
             ros-noetic-controller-manager \
+            ros-noetic-joint-state-controller \
             ros-noetic-hardware-interface \
             ros-noetic-realtime-tools \
-            python3-catkin-tools \
-            libeigen3-dev \
-            libxml2-utils
+            ros-noetic-robot-state-publisher \
+            ros-noetic-urdf \
+            libeigen3-dev liburdfdom-tools
 
-      - name: catkin_make (best-effort — allows failure while robot_common is unresolved)
-        continue-on-error: true
+      - uses: actions/checkout@v4
+        with:
+          path: src/tron2_gazebo_ros
+
+      - name: Fetch sibling packages (as in the README workspace setup)
+        run: |
+          set -e
+          cd src
+          git clone --depth 1 https://github.com/limxdynamics/tron2_rl_deploy_ros.git
+          git clone --depth 1 https://github.com/limxdynamics/limxsdk-lowlevel.git
+          GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 https://github.com/limxdynamics/tron2-robot-description.git
+          for r in tron2_rl_deploy_ros limxsdk-lowlevel tron2-robot-description; do
+            echo "::notice::$r @ $(git -C $r rev-parse --short HEAD)"
+          done
+
+      - name: catkin_make
         run: |
           set -e
           source /opt/ros/noetic/setup.bash
-          cd $GITHUB_WORKSPACE
-          catkin_make || echo "::warning::catkin_make failed — likely missing sibling packages (robot_common); see CONTRIBUTING.md."
+          catkin_make 2>&1 | tail -n 60
+          test ${PIPESTATUS[0]} -eq 0
+
+      - name: URDF expands for SF_TRON2A and WF_TRON2A
+        run: |
+          set -e
+          source devel/setup.bash
+          for r in SF_TRON2A WF_TRON2A; do
+            xacro "$(rospack find robot_description)/tron2a/$r/xacro/robot.urdf.xacro" ros_version:=1 > /tmp/$r.urdf
+            check_urdf /tmp/$r.urdf | head -n 3
+            grep -q 'tron2_gazebo/Tron2HWSim' /tmp/$r.urdf
+            echo "::notice::$r URDF expands and loads tron2_gazebo/Tron2HWSim"
+          done
+
+      - name: Gazebo smoke test (headless, 60 s per robot)
+        run: |
+          set -e
+          ip link set lo multicast on
+          ip route add 239.0.0.0/8 dev lo || true
+          source devel/setup.bash
+          for r in SF_TRON2A WF_TRON2A; do
+            log=/tmp/sim_$r.log
+            xvfb-run -a roslaunch tron2_hw tron2_hw_sim.launch robot_type:=$r use_joystick:=false > $log 2>&1 &
+            pid=$!
+            sleep 35
+            z0=$(timeout 10 rostopic echo -n1 /gazebo/model_states | python3 -c "import sys,yaml; m=yaml.safe_load(sys.stdin.read().split('---')[0]); i=m['name'].index('tron2_robot'); p=m['pose'][i]['position']; print('%.3f %.3f %.3f'%(p['x'],p['y'],p['z']))")
+            rostopic pub -1 /tron2_controller/set_mode std_msgs/String "data: 'WALK'"
+            timeout 20 rostopic pub -r 10 /cmd_vel geometry_msgs/Twist "{linear: {x: 0.3}}" || true
+            z1=$(timeout 10 rostopic echo -n1 /gazebo/model_states | python3 -c "import sys,yaml; m=yaml.safe_load(sys.stdin.read().split('---')[0]); i=m['name'].index('tron2_robot'); p=m['pose'][i]['position']; print('%.3f %.3f %.3f'%(p['x'],p['y'],p['z']))")
+            echo "::notice::$r base xyz standing: $z0 | after 20 s WALK at 0.3 m/s: $z1"
+            grep -iE "Tron2HWSim|tron2_controller|error" $log | head -n 20 || true
+            kill -INT $pid || true
+            sleep 8
+            pkill -9 -f gzserver || true
+            pkill -9 -f gzclient || true
+            sleep 2
+          done

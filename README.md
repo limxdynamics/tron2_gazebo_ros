@@ -22,9 +22,9 @@
 
 > **Distribution:** the primary open-source copy of this repository is
 > hosted at
-> [`github.com/limx-tron2/tron2-gazebo-ros`](https://github.com/limx-tron2/tron2-gazebo-ros).
-> The internal GitLab at `192.168.2.65:8080/rl/poc/tron/tron2_open_source/tron2-gazebo-ros`
-> is a private mirror used for LimX-internal development only.
+> [`github.com/limxdynamics/tron2_gazebo_ros`](https://github.com/limxdynamics/tron2_gazebo_ros).
+> The internal LimX GitLab is a mirror; open issues, PRs, and security
+> reports on the GitHub repository.
 
 Gazebo Classic 11 simulation of the TRON2A biped, sole-foot (`SF_TRON2A`)
 and wheel-foot (`WF_TRON2A`), for ROS Noetic. The `Tron2HWSim`
@@ -68,7 +68,6 @@ git clone https://github.com/limxdynamics/limxsdk-lowlevel.git
 git clone https://github.com/limxdynamics/tron2_gazebo_ros.git
 git clone https://github.com/limxdynamics/tron2_rl_deploy_ros.git
 git clone https://github.com/limxdynamics/tron2-robot-description.git
-ln -s tron2a tron2-robot-description/tron2   # see the note in section 3
 
 cd ~/limx_ws
 source /opt/ros/noetic/setup.bash
@@ -176,16 +175,8 @@ Set up an algorithm-development workspace as follows:
   git clone https://github.com/limxdynamics/tron2-robot-description.git
   ```
 
-  The launch files look for models at
-  `$(find robot_description)/tron2/<robot_type>/`, while
-  `tron2-robot-description` keeps TRON2A models under `tron2a/`. Until the
-  two agree, add a link:
-
-  ```
-  ln -s tron2a ~/limx_ws/src/tron2-robot-description/tron2
-  ```
-
-  The USD files tracked with Git LFS in that repository are not needed for
+  The launch files load TRON2A models from its `tron2a/` directory. The
+  USD files tracked with Git LFS in that repository are not needed for
   Gazebo.
 
 Then, from the workspace root:
@@ -307,8 +298,11 @@ deployment.
 - Gazebo plugin / controller fails to load:
   - Confirm that `tron2_gazebo`, `tron2_hw`, and `tron2_controllers`
     have all built successfully.
-- `xacro` or `cat` cannot find `robot_description/tron2/<robot_type>/...`:
-  - Add the `tron2 -> tron2a` link described in section 3.
+- `xacro` or `cat` cannot find `robot_description/tron2a/<robot_type>/...`:
+  - Make sure `robot_description` comes from
+    [`tron2-robot-description`](https://github.com/limxdynamics/tron2-robot-description),
+    not from the TRON1 `robot-description` repository, then re-source
+    `devel/setup.bash`.
 - The `joystick_teleop` node exits with "No joystick found!":
   - Connect a gamepad, or launch with `use_joystick:=false` and publish
     `/cmd_vel` and `/tron2_controller/set_mode` yourself (see Quick start).
@@ -404,12 +398,12 @@ Companion documents in this repository:
 - [`CHANGELOG.md`](CHANGELOG.md) — release notes and the remaining
   "Pending owner sign-off" list.
 
-> **⚠ TO CONFIRM.** Any link that previously pointed at
+> **Note.** Any link that previously pointed at
 > `../tron2-rl-deploy-ros/LICENSE` is **not** a licence grant for
 > *this* repository — the section above, `NOTICE`, and
 > `THIRD_PARTY_NOTICES.md` §1 are the authoritative status. Both
-> `tron2_gazebo/package.xml` and `limxsdk-sim/package.xml` still
-> declare non-open-source `<license>` values pending owner sign-off.
+> `tron2_gazebo/package.xml` and `limxsdk-sim/package.xml` declare
+> `Apache-2.0` (resolved 2026-07-14, see `THIRD_PARTY_NOTICES.md` §1).
 
 ## Scope
 
@@ -448,4 +442,7 @@ Companion documents in this repository:
 - No customer-specific or site-specific configuration.
 
 For the deployment stack, model weights, and the real-robot SDK,
-see the sibling repositories in the `limx-tron2` organisation.
+see the sibling repositories
+[`tron2_rl_deploy_ros`](https://github.com/limxdynamics/tron2_rl_deploy_ros),
+[`limxsdk-lowlevel`](https://github.com/limxdynamics/limxsdk-lowlevel) and
+[`tron2-robot-description`](https://github.com/limxdynamics/tron2-robot-description).

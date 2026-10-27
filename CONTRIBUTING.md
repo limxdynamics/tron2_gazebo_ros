@@ -62,12 +62,14 @@ Prerequisites:
   ```
 
 Clone into a catkin workspace alongside the sibling repositories
-(`robot-description`, `limxsdk-lowlevel`, `tron2-rl-deploy-ros`):
+(`tron2-robot-description`, `limxsdk-lowlevel`, `tron2_rl_deploy_ros`):
 
 ```bash
 mkdir -p ~/limx_ws/src && cd ~/limx_ws/src
-git clone https://github.com/limx-tron2/tron2-gazebo-ros.git
-# plus robot-description, limxsdk-lowlevel, tron2-rl-deploy-ros
+git clone https://github.com/limxdynamics/tron2_gazebo_ros.git
+git clone https://github.com/limxdynamics/tron2_rl_deploy_ros.git
+git clone https://github.com/limxdynamics/limxsdk-lowlevel.git
+git clone https://github.com/limxdynamics/tron2-robot-description.git
 
 cd ~/limx_ws
 source /opt/ros/noetic/setup.bash

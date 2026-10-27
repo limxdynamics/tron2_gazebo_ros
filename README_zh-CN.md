@@ -21,9 +21,8 @@
 # tron2_gazebo_ros
 
 > **分发说明：** 本仓库的开源主副本托管于
-> [`github.com/limx-tron2/tron2-gazebo-ros`](https://github.com/limx-tron2/tron2-gazebo-ros)。
-> 内部 GitLab `192.168.2.65:8080/rl/poc/tron/tron2_open_source/tron2-gazebo-ros`
-> 仅作为 LimX 内部开发使用的私有镜像。
+> [`github.com/limxdynamics/tron2_gazebo_ros`](https://github.com/limxdynamics/tron2_gazebo_ros)。
+> LimX 内部 GitLab 仅为镜像；Issue、PR 和安全报告请提交到 GitHub 仓库。
 
 TRON2A 双足机器人在 ROS Noetic 下的 Gazebo Classic 11 仿真，支持足底（`SF_TRON2A`）和轮足（`WF_TRON2A`）。`Tron2HWSim` 这个 `gazebo_ros_control` 插件通过 LimX SDK 的 `RobotCmd` / `RobotState` 接口暴露仿真关节和 IMU，因此 [tron2_rl_deploy_ros](https://github.com/limxdynamics/tron2_rl_deploy_ros) 中的控制器在 Gazebo 里的运行方式与在真机上完全相同。
 
@@ -58,7 +57,6 @@ git clone https://github.com/limxdynamics/limxsdk-lowlevel.git
 git clone https://github.com/limxdynamics/tron2_gazebo_ros.git
 git clone https://github.com/limxdynamics/tron2_rl_deploy_ros.git
 git clone https://github.com/limxdynamics/tron2-robot-description.git
-ln -s tron2a tron2-robot-description/tron2   # 原因见第 3 节
 
 cd ~/limx_ws
 source /opt/ros/noetic/setup.bash
@@ -160,13 +158,7 @@ sudo apt-get install -y \
   git clone https://github.com/limxdynamics/tron2-robot-description.git
   ```
 
-  launch 文件按 `$(find robot_description)/tron2/<robot_type>/` 查找模型，而 `tron2-robot-description` 把 TRON2A 模型放在 `tron2a/` 下。两边统一之前，先建一个链接：
-
-  ```
-  ln -s tron2a ~/limx_ws/src/tron2-robot-description/tron2
-  ```
-
-  该仓库中用 Git LFS 管理的 USD 文件 Gazebo 用不到。
+  launch 文件从其中的 `tron2a/` 目录加载 TRON2A 模型。该仓库中用 Git LFS 管理的 USD 文件 Gazebo 用不到。
 
 在工作区根目录执行：
 
@@ -280,8 +272,8 @@ roslaunch tron2_hw tron2_hw.launch robot_type:=SF_TRON2A robot_ip:=<robot-ip>
   - 在 `~/limx_ws` 下重新执行 `catkin_make`
 - Gazebo 插件/控制器加载失败：
   - 先确认 `tron2_gazebo`、`tron2_hw`、`tron2_controllers`均已成功编译
-- `xacro` 或 `cat` 找不到 `robot_description/tron2/<robot_type>/...`：
-  - 按第 3 节建立 `tron2 -> tron2a` 链接
+- `xacro` 或 `cat` 找不到 `robot_description/tron2a/<robot_type>/...`：
+  - 确认 `robot_description` 来自 [`tron2-robot-description`](https://github.com/limxdynamics/tron2-robot-description)，而不是 TRON1 的 `robot-description` 仓库，然后重新 source `devel/setup.bash`
 - `joystick_teleop` 节点报 "No joystick found!" 后退出：
   - 接上手柄，或用 `use_joystick:=false` 启动，自行发布 `/cmd_vel` 和 `/tron2_controller/set_mode`（见快速开始）
 
@@ -371,11 +363,11 @@ grep -RnE '\b(10|172\.(1[6-9]|2[0-9]|3[01])|192\.168)\.[0-9]+\.[0-9]+\b' \
 - [`CHANGELOG.md`](CHANGELOG.md) — 版本说明及剩余的
   "Pending owner sign-off" 清单。
 
-> **⚠ TO CONFIRM.** 任何此前指向
+> **说明：** 任何此前指向
 > `../tron2-rl-deploy-ros/LICENSE` 的链接都**不是**对*本*仓库的许可授予
 > ——上述章节、`NOTICE` 及 `THIRD_PARTY_NOTICES.md` §1 才是权威状态。
-> `tron2_gazebo/package.xml` 和 `limxsdk-sim/package.xml` 目前仍声明
-> 非开源的 `<license>` 值，等待责任人签署确认。
+> `tron2_gazebo/package.xml` 和 `limxsdk-sim/package.xml` 均已声明
+> `Apache-2.0`（2026-07-14 确认，见 `THIRD_PARTY_NOTICES.md` §1）。
 
 
 ## 适用范围
@@ -411,4 +403,7 @@ grep -RnE '\b(10|172\.(1[6-9]|2[0-9]|3[01])|192\.168)\.[0-9]+\.[0-9]+\b' \
   [`SECURITY.md`](SECURITY.md)。
 - 客户特定或场地特定的配置。
 
-部署栈、模型权重与实机 SDK 请参考 `limx-tron2` 组织下的兄弟仓库。
+部署栈、模型权重与实机 SDK 请参考兄弟仓库
+[`tron2_rl_deploy_ros`](https://github.com/limxdynamics/tron2_rl_deploy_ros)、
+[`limxsdk-lowlevel`](https://github.com/limxdynamics/limxsdk-lowlevel) 和
+[`tron2-robot-description`](https://github.com/limxdynamics/tron2-robot-description)。
