@@ -6,8 +6,8 @@ contact_links:
       Do NOT open a public issue for security reports. Email
       contact@limxdynamics.com; see SECURITY.md for the full policy.
   - name: General questions
-    url: https://github.com/limx-tron2/tron2-gazebo-ros/discussions
+    url: https://github.com/limxdynamics/tron2_gazebo_ros#8-faq
     about: >
-      Use Discussions for how-to questions, Gazebo / ros_control
+      Check the README FAQ for how-to questions, Gazebo / ros_control
       integration help, or simulator-specific quirks that are not
       yet a defect.

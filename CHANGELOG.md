@@ -31,6 +31,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `*.dll`, `*.dylib`, `*.lib`, `*.whl`).
 
 ### Changed
+- `README.md` / `README_zh-CN.md`: landing page with banner, model
+  cards, how-it-works picture, highlights and quick start (new images
+  `doc/banner.png`, `doc/model_{sf,wf}.png`, `doc/sim2real_{en,zh}.png`
+  rendered from `tron2-robot-description`). Workspace setup now clones
+  this repository instead of `tron1-gazebo-ros`, adds
+  `tron2_rl_deploy_ros` and `tron2-robot-description`, and documents the
+  `tron2 -> tron2a` link the launch files need. New sections for the
+  `tron2_hw_sim.launch` arguments and the gamepad mapping; two FAQ
+  entries. "Cite & support" links point at this repository; License,
+  Scope and Distribution text unchanged, License and Scope moved to the
+  end.
+- Real-world GIF captions corrected: `doc/wf.GIF` shows SF_TRON2A and
+  `doc/sf.GIF` shows WF_TRON2A.
+- Media: Gazebo GIFs cropped to the area the robot walks in and stripped
+  of their converter comment; real-world GIFs center-cropped to 300x300
+  at 8 fps; `doc/deploy.jpg` converted to sRGB without EXIF. `doc/`
+  drops from about 100 MB to about 11 MB.
+- `.github/ISSUE_TEMPLATE/config.yml`: "General questions" now points at
+  the README FAQ (Discussions are disabled on this repository).
 - `tron2_gazebo/package.xml`: `<version>` bumped from `0.0.0` to
   `0.1.0` for first public release; `<maintainer>` set to
   `LimX Dynamics <contact@limxdynamics.com>`.
