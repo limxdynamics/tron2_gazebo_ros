@@ -31,6 +31,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `*.dll`, `*.dylib`, `*.lib`, `*.whl`).
 
 ### Fixed
+- `limxsdk-sim/CMakeLists.txt` no longer copies its headers into
+  `devel/include`; its older `limxsdk/datatypes.h` shadowed
+  limxsdk-lowlevel's and broke `tron2_hw` in the same workspace.
+- README: pin limxsdk-lowlevel to 4.0.0 (`64e3b99`); v4.1.1 and later
+  include unshipped `mros/hand_msgs` headers.
 - `tron2_gazebo/launch/empty_world.launch`: load the URDF from
   `robot_description/tron2a/<robot_type>/`, the layout used by
   `tron2-robot-description`; the old `tron2/` path did not exist there.

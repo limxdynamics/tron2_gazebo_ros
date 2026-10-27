@@ -54,6 +54,7 @@ Ubuntu 20.04，已安装 ROS Noetic 和[第 2 节](#2-环境要求)中的依赖�
 ```bash
 mkdir -p ~/limx_ws/src && cd ~/limx_ws/src
 git clone https://github.com/limxdynamics/limxsdk-lowlevel.git
+git -C limxsdk-lowlevel checkout 64e3b99   # 4.0.0，原因见第 3 节
 git clone https://github.com/limxdynamics/tron2_gazebo_ros.git
 git clone https://github.com/limxdynamics/tron2_rl_deploy_ros.git
 git clone https://github.com/limxdynamics/tron2-robot-description.git
@@ -135,7 +136,10 @@ sudo apt-get install -y \
   ```
   cd ~/limx_ws/src
   git clone https://github.com/limxdynamics/limxsdk-lowlevel.git
+  git -C limxsdk-lowlevel checkout 64e3b99
   ```
+
+  目前请使用 limxsdk-lowlevel 4.0.0（`64e3b99`）：从 v4.1.1 起它的 `tron2.h` 引用了未随 SDK 发布的 `mros/hand_msgs/*.h`，`tron2_hw` 无法编译。
 
 - 下载 Gazebo 仿真器（本仓库）：
 
@@ -317,7 +321,7 @@ grep -RnE '\b(10|172\.(1[6-9]|2[0-9]|3[01])|192\.168)\.[0-9]+\.[0-9]+\b' \
      grep -v '127\.0\.0\.1'
 ```
 
-本次整改对照 `tron2_rl_deploy_ros` 和 `tron2-robot-description` 检查了 launch 文件、插件、手柄脚本及其依赖，没有编译工作区，也没有运行 Gazebo。
+CI 还会在 `ros:noetic` 容器中编译完整工作空间（本仓库、`tron2_rl_deploy_ros`、`limxsdk-lowlevel` 4.0.0 和 `tron2-robot-description`），展开两个 URDF，并运行无界面的 Gazebo 冒烟测试。在共享 runner 上实时因子约 0.4 的条件下，两台机器人都在 2 秒悬空结束后倒地；尚未在 Ubuntu 20.04 桌面环境复核。
 
 ---
 

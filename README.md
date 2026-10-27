@@ -65,6 +65,7 @@ Ubuntu 20.04 with ROS Noetic and the packages in [section 2](#2-requirements):
 ```bash
 mkdir -p ~/limx_ws/src && cd ~/limx_ws/src
 git clone https://github.com/limxdynamics/limxsdk-lowlevel.git
+git -C limxsdk-lowlevel checkout 64e3b99   # 4.0.0, see section 3
 git clone https://github.com/limxdynamics/tron2_gazebo_ros.git
 git clone https://github.com/limxdynamics/tron2_rl_deploy_ros.git
 git clone https://github.com/limxdynamics/tron2-robot-description.git
@@ -151,7 +152,12 @@ Set up an algorithm-development workspace as follows:
   ```
   cd ~/limx_ws/src
   git clone https://github.com/limxdynamics/limxsdk-lowlevel.git
+  git -C limxsdk-lowlevel checkout 64e3b99
   ```
+
+  Use limxsdk-lowlevel 4.0.0 (`64e3b99`) for now: from v4.1.1 on, its
+  `tron2.h` includes `mros/hand_msgs/*.h` headers that are not shipped,
+  so `tron2_hw` does not compile.
 
 - Download the Gazebo simulator (this repository):
 
@@ -347,9 +353,12 @@ grep -RnE '\b(10|172\.(1[6-9]|2[0-9]|3[01])|192\.168)\.[0-9]+\.[0-9]+\b' \
      grep -v '127\.0\.0\.1'
 ```
 
-This pass checked the launch files, plugin, teleop script and their
-dependencies against `tron2_rl_deploy_ros` and `tron2-robot-description`. It
-did not build the workspace or run Gazebo.
+CI also builds the full workspace in a `ros:noetic` container (this
+repository, `tron2_rl_deploy_ros`, `limxsdk-lowlevel` 4.0.0 and
+`tron2-robot-description`), expands both URDFs and runs a headless Gazebo
+smoke test. In that test, on a shared runner at a real-time factor of
+about 0.4, both robots dropped to the ground when the 2 s air hold ended;
+this has not yet been checked on an Ubuntu 20.04 desktop.
 
 ---
 
