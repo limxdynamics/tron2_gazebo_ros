@@ -198,7 +198,8 @@ jobs:
           source devel/setup.bash
           for r in SF_TRON2A WF_TRON2A; do
             xacro "$(rospack find robot_description)/tron2a/$r/xacro/robot.urdf.xacro" ros_version:=1 > /tmp/$r.urdf
-            check_urdf /tmp/$r.urdf | head -n 3
+            check_urdf /tmp/$r.urdf > /tmp/$r.check
+            head -n 3 /tmp/$r.check
             grep -q 'tron2_gazebo/Tron2HWSim' /tmp/$r.urdf
             echo "::notice::$r URDF expands and loads tron2_gazebo/Tron2HWSim"
           done
