@@ -211,8 +211,10 @@ jobs:
             timeout 10 rostopic echo -n1 /gazebo/model_states 2>/dev/null | python3 -c "
           import sys, yaml
           try:
-              m = yaml.safe_load(sys.stdin.read().split('---')[0]); i = m['name'].index('tron2_robot'); p = m['pose'][i]['position']
-              print('%.2f,%.2f,%.2f' % (p['x'], p['y'], p['z']))
+              import math
+              m = yaml.safe_load(sys.stdin.read().split('---')[0]); i = m['name'].index('tron2_robot'); p = m['pose'][i]['position']; q = m['pose'][i]['orientation']
+              yaw = math.degrees(math.atan2(2 * (q['w'] * q['z'] + q['x'] * q['y']), 1 - 2 * (q['y'] ** 2 + q['z'] ** 2)))
+              print('%.2f,%.2f,%.2f,yaw%.0f' % (p['x'], p['y'], p['z'], yaw))
           except Exception as e:
               print('n/a')"
           }
