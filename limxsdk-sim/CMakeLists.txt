@@ -15,9 +15,13 @@ if(DEFINED ENV{ROS_DISTRO})
       roscpp
     )
 
-    add_custom_target(limxsdk_sim_include_target ALL
-      COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/include/. ${CATKIN_DEVEL_PREFIX}/include
-    )
+    # Headers are exported through catkin_package(INCLUDE_DIRS include)
+    # below. They used to be copied into ${CATKIN_DEVEL_PREFIX}/include,
+    # which put this package's limxsdk/datatypes.h, apibase.h and macros.h
+    # ahead of limxsdk-lowlevel's newer ones for every package in the
+    # workspace and broke tron2_hw. The empty target is kept so packages
+    # that depend on it still configure.
+    add_custom_target(limxsdk_sim_include_target ALL)
 
     if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64")
       set(LIB_PATH ${PROJECT_SOURCE_DIR}/lib/aarch64)
