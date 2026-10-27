@@ -166,7 +166,11 @@ jobs:
           set -e
           cd src
           git clone --depth 1 https://github.com/limxdynamics/tron2_rl_deploy_ros.git
-          git clone --depth 1 https://github.com/limxdynamics/limxsdk-lowlevel.git
+          git clone https://github.com/limxdynamics/limxsdk-lowlevel.git
+          # limxsdk-lowlevel master (since 81884fc) includes mros/hand_msgs
+          # headers it does not ship, so tron2_hw does not compile against it.
+          # Pin the last release that builds until the SDK is fixed.
+          git -C limxsdk-lowlevel checkout -q "${LIMXSDK_REF:-64e3b99}"
           GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 https://github.com/limxdynamics/tron2-robot-description.git
           for r in tron2_rl_deploy_ros limxsdk-lowlevel tron2-robot-description; do
             echo "::notice::$r @ $(git -C $r rev-parse --short HEAD)"
