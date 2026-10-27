@@ -166,11 +166,7 @@ jobs:
           set -e
           cd src
           git clone --depth 1 https://github.com/limxdynamics/tron2_rl_deploy_ros.git
-          git clone https://github.com/limxdynamics/limxsdk-lowlevel.git
-          # limxsdk-lowlevel master (since 81884fc) includes mros/hand_msgs
-          # headers it does not ship, so tron2_hw does not compile against it.
-          # Pin the last release that builds until the SDK is fixed.
-          git -C limxsdk-lowlevel checkout -q "${LIMXSDK_REF:-64e3b99}"
+          git clone --depth 1 https://github.com/limxdynamics/limxsdk-lowlevel.git
           GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 https://github.com/limxdynamics/tron2-robot-description.git
           for r in tron2_rl_deploy_ros limxsdk-lowlevel tron2-robot-description; do
             echo "::notice::$r @ $(git -C $r rev-parse --short HEAD)"
@@ -225,7 +221,13 @@ jobs:
             xvfb-run -a -s "-screen 0 1280x720x24" roslaunch tron2_hw tron2_hw_sim.launch robot_type:=$r use_joystick:=false > $log 2>&1 &
             pid=$!
             trace=""
-            for t in 10 15 20 25 30 35; do sleep 5; trace="$trace t$t=$(pose)"; done
+            for t in 8 10 12; do sleep 2; [ $t = 8 ] && sleep 6; trace="$trace t$t=$(pose)"
+              js=$(timeout 5 rostopic echo -n1 /joint_states/position 2>/dev/null | head -n1 | cut -c1-120)
+              echo "::notice::$r t$t joint_states.position: $js"
+            done
+            ctl=$(timeout 10 rosservice call /tron2_hw/controller_manager/list_controllers 2>/dev/null | grep -E "name:|state:" | tr -s ' ' | tr '\n' ' ' | cut -c1-300)
+            echo "::notice::$r controllers: $ctl"
+            for t in 15 20 25 30 35; do sleep 5; trace="$trace t$t=$(pose)"; done
             rostopic pub -1 /tron2_controller/set_mode std_msgs/String "data: 'WALK'" > /dev/null 2>&1 || true
             (timeout 20 rostopic pub -r 10 /cmd_vel geometry_msgs/Twist "{linear: {x: 0.3}}" > /dev/null 2>&1 &)
             for t in 40 45 50 55; do sleep 5; trace="$trace walk$t=$(pose)"; done
