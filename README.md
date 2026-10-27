@@ -76,8 +76,11 @@ source devel/setup.bash
 roslaunch tron2_hw tron2_hw_sim.launch robot_type:=SF_TRON2A
 ```
 
-Without a gamepad, add `use_joystick:=false` and start walking from a second
-terminal:
+Without a gamepad, add `use_joystick:=false` and switch to `WALK` from a
+second terminal **while the robot is still held in the air** (the hold lasts
+`air_hold_duration`, 2 s by default; add `air_hold_duration:=8` to get more
+time). In `STAND` the controller only holds the joints at the default pose
+and does not balance, so the robot tips over once it is released:
 
 ```bash
 rostopic pub -1 /tron2_controller/set_mode std_msgs/String "data: 'WALK'"
@@ -350,9 +353,12 @@ grep -RnE '\b(10|172\.(1[6-9]|2[0-9]|3[01])|192\.168)\.[0-9]+\.[0-9]+\b' \
 CI also builds the full workspace in a `ros:noetic` container (this
 repository, `tron2_rl_deploy_ros`, `limxsdk-lowlevel` and
 `tron2-robot-description`), expands both URDFs and runs a headless Gazebo
-smoke test. In that test, on a shared runner at a real-time factor of
-about 0.4, both robots dropped to the ground when the 2 s air hold ended;
-this has not yet been checked on an Ubuntu 20.04 desktop.
+smoke test that switches to `WALK` during an 8 s air hold and then sends
+0.3 m/s forward. SF_TRON2A stood at a base height of 0.73 m and walked
+forward along its heading in every run. WF_TRON2A stood and moved in a run
+at real-time factor 1.0 but fell in one at 0.23, so it still needs a check
+on an Ubuntu 20.04 desktop. Left in `STAND`, both robots tip over within
+about 2 s of being released.
 
 ---
 

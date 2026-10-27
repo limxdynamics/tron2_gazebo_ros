@@ -31,6 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `*.dll`, `*.dylib`, `*.lib`, `*.whl`).
 
 ### Fixed
+- README (EN/ZH): switch to `WALK` while the robot is still held in the
+  air; in `STAND` it only holds its joints and tips over after release.
+  Verification notes record the smoke-test results.
 - `limxsdk-sim/CMakeLists.txt` no longer copies its headers into
   `devel/include`; its older `limxsdk/datatypes.h` shadowed
   limxsdk-lowlevel's and broke `tron2_hw` in the same workspace.

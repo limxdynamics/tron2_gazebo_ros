@@ -65,7 +65,7 @@ source devel/setup.bash
 roslaunch tron2_hw tron2_hw_sim.launch robot_type:=SF_TRON2A
 ```
 
-没有手柄时加上 `use_joystick:=false`，在另一个终端里切换到行走：
+没有手柄时加上 `use_joystick:=false`，并在另一个终端里**趁机器人还被悬在空中时**切换到 `WALK`（悬空时长为 `air_hold_duration`，默认 2 秒；加上 `air_hold_duration:=8` 可以多留些时间）。`STAND` 模式只把关节保持在默认姿态，不做平衡，机器人被放下后会倾倒：
 
 ```bash
 rostopic pub -1 /tron2_controller/set_mode std_msgs/String "data: 'WALK'"
@@ -317,7 +317,7 @@ grep -RnE '\b(10|172\.(1[6-9]|2[0-9]|3[01])|192\.168)\.[0-9]+\.[0-9]+\b' \
      grep -v '127\.0\.0\.1'
 ```
 
-CI 还会在 `ros:noetic` 容器中编译完整工作空间（本仓库、`tron2_rl_deploy_ros`、`limxsdk-lowlevel` 和 `tron2-robot-description`），展开两个 URDF，并运行无界面的 Gazebo 冒烟测试。在共享 runner 上实时因子约 0.4 的条件下，两台机器人都在 2 秒悬空结束后倒地；尚未在 Ubuntu 20.04 桌面环境复核。
+CI 还会在 `ros:noetic` 容器中编译完整工作空间（本仓库、`tron2_rl_deploy_ros`、`limxsdk-lowlevel` 和 `tron2-robot-description`），展开两个 URDF，并运行无界面的 Gazebo 冒烟测试：在 8 秒悬空期间切换到 `WALK`，然后发送 0.3 m/s 前进指令。SF_TRON2A 每次都以 0.73 m 机身高度站稳，并沿机头方向前进。WF_TRON2A 在实时因子 1.0 的一次运行中站稳并移动，在实时因子 0.23 的一次运行中倒地，仍需在 Ubuntu 20.04 桌面环境复核。若一直停留在 `STAND`，两台机器人都会在放下后约 2 秒内倾倒。
 
 ---
 
