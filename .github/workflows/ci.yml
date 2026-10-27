@@ -176,8 +176,17 @@ jobs:
         run: |
           set -e
           source /opt/ros/noetic/setup.bash
-          catkin_make 2>&1 | tail -n 60
-          test ${PIPESTATUS[0]} -eq 0
+          set +e
+          catkin_make > /tmp/catkin.log 2>&1
+          rc=$?
+          set -e
+          tail -n 80 /tmp/catkin.log
+          if [ $rc -ne 0 ]; then
+            # Surface the first errors as annotations so they show without the raw log.
+            grep -nE "error|Error|CMake Error|Could not find|not found" /tmp/catkin.log | head -n 10 | \
+              while IFS= read -r l; do echo "::error::${l:0:400}"; done
+            exit $rc
+          fi
 
       - name: URDF expands for SF_TRON2A and WF_TRON2A
         run: |
