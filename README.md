@@ -4,7 +4,7 @@
 -->
 
 <p align="center">
-  <img src="doc/banner.png" alt="tron2_gazebo_ros: the sole-foot and wheel-foot TRON2A robots this repository simulates in Gazebo" width="100%">
+  <img src="doc/banner.png" alt="tron2_gazebo_ros: one controller drives TRON2A in Gazebo and on the real robot" width="100%">
 </p>
 
 <p align="center">

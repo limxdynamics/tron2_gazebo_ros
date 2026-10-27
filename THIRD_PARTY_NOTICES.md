@@ -122,7 +122,7 @@ independently.
 | `doc/deploy.jpg` | Photo of physical deployment | ⚠ TO CONFIRM | ⚠ TO CONFIRM | ⚠ |
 | `doc/sf.GIF`, `doc/sfgazebo-ezgif.com-video-to-gif-converter.gif` | Simulation / real-robot capture | ⚠ TO CONFIRM | ⚠ TO CONFIRM | ⚠ |
 | `doc/wf.GIF`, `doc/wfgazebo.gif` | Simulation / real-robot capture | ⚠ TO CONFIRM | ⚠ TO CONFIRM | ⚠ |
-| `doc/banner.png` | Rendered banner (SF_TRON2A, WF_TRON2A) | Rendered by LimX Dynamics from the meshes in [`tron2-robot-description`](https://github.com/limxdynamics/tron2-robot-description) (Apache-2.0) | Apache-2.0 | ✅ |
+| `doc/banner.png`, `doc/banner_zh.png`, `doc/social_preview.png` | Rendered banner (EN / ZH) and social preview (SF_TRON2A) | Rendered by LimX Dynamics from the meshes in [`tron2-robot-description`](https://github.com/limxdynamics/tron2-robot-description) (Apache-2.0) | Apache-2.0 | ✅ |
 | `doc/model_sf.png`, `doc/model_wf.png` | Rendered model cards | Rendered by LimX Dynamics from the meshes in `tron2-robot-description` (Apache-2.0) | Apache-2.0 | ✅ |
 | `doc/sim2real_en.png`, `doc/sim2real_zh.png` | How-it-works diagram | Composed by LimX Dynamics from a frame of `doc/sfgazebo-ezgif.com-video-to-gif-converter.gif` and a `tron2-robot-description` render | Apache-2.0 | ✅ |
 

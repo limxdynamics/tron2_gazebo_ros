@@ -69,6 +69,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   end.
 - Real-world GIF captions corrected: `doc/wf.GIF` shows SF_TRON2A and
   `doc/sf.GIF` shows WF_TRON2A.
+- `doc/banner.png` redrawn: one SF_TRON2A, half Gazebo hologram on a
+  grid floor and half studio-lit real robot, joined by a "same
+  controller" label, so the banner shows what the repository does.
+  New `doc/banner_zh.png` (used by `README_zh-CN.md`) and
+  `doc/social_preview.png` (1280x640, for Settings -> Social preview).
+  Rendered from `tron2-robot-description`; no metadata chunks.
 - Media: Gazebo GIFs cropped to the area the robot walks in and stripped
   of their converter comment; real-world GIFs center-cropped to 300x300
   at 8 fps; `doc/deploy.jpg` converted to sRGB without EXIF. `doc/`

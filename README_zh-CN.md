@@ -4,7 +4,7 @@
 -->
 
 <p align="center">
-  <img src="doc/banner.png" alt="tron2_gazebo_ros：本仓库在 Gazebo 中仿真的足底与轮足 TRON2A" width="100%">
+  <img src="doc/banner_zh.png" alt="tron2_gazebo_ros：同一套控制器既驱动 Gazebo 中的 TRON2A，也驱动实机" width="100%">
 </p>
 
 <p align="center">
