@@ -203,26 +203,34 @@ jobs:
             echo "::notice::$r URDF expands and loads tron2_gazebo/Tron2HWSim"
           done
 
-      - name: Gazebo smoke test (headless, 60 s per robot)
+      - name: Gazebo smoke test (headless)
         run: |
-          set -e
           ip link set lo multicast on
           ip route add 239.0.0.0/8 dev lo || true
           source devel/setup.bash
+          pose() {
+            timeout 10 rostopic echo -n1 /gazebo/model_states 2>/dev/null | python3 -c "
+          import sys, yaml
+          try:
+              m = yaml.safe_load(sys.stdin.read().split('---')[0]); i = m['name'].index('tron2_robot'); p = m['pose'][i]['position']
+              print('%.2f,%.2f,%.2f' % (p['x'], p['y'], p['z']))
+          except Exception as e:
+              print('n/a')"
+          }
           for r in SF_TRON2A WF_TRON2A; do
             log=/tmp/sim_$r.log
-            xvfb-run -a roslaunch tron2_hw tron2_hw_sim.launch robot_type:=$r use_joystick:=false > $log 2>&1 &
+            xvfb-run -a -s "-screen 0 1280x720x24" roslaunch tron2_hw tron2_hw_sim.launch robot_type:=$r use_joystick:=false > $log 2>&1 &
             pid=$!
-            sleep 35
-            z0=$(timeout 10 rostopic echo -n1 /gazebo/model_states | python3 -c "import sys,yaml; m=yaml.safe_load(sys.stdin.read().split('---')[0]); i=m['name'].index('tron2_robot'); p=m['pose'][i]['position']; print('%.3f %.3f %.3f'%(p['x'],p['y'],p['z']))")
-            rostopic pub -1 /tron2_controller/set_mode std_msgs/String "data: 'WALK'"
-            timeout 20 rostopic pub -r 10 /cmd_vel geometry_msgs/Twist "{linear: {x: 0.3}}" || true
-            z1=$(timeout 10 rostopic echo -n1 /gazebo/model_states | python3 -c "import sys,yaml; m=yaml.safe_load(sys.stdin.read().split('---')[0]); i=m['name'].index('tron2_robot'); p=m['pose'][i]['position']; print('%.3f %.3f %.3f'%(p['x'],p['y'],p['z']))")
-            echo "::notice::$r base xyz standing: $z0 | after 20 s WALK at 0.3 m/s: $z1"
-            grep -iE "Tron2HWSim|tron2_controller|error" $log | head -n 20 || true
-            kill -INT $pid || true
-            sleep 8
-            pkill -9 -f gzserver || true
-            pkill -9 -f gzclient || true
-            sleep 2
+            trace=""
+            for t in 10 15 20 25 30 35; do sleep 5; trace="$trace t$t=$(pose)"; done
+            rostopic pub -1 /tron2_controller/set_mode std_msgs/String "data: 'WALK'" > /dev/null 2>&1 || true
+            (timeout 20 rostopic pub -r 10 /cmd_vel geometry_msgs/Twist "{linear: {x: 0.3}}" > /dev/null 2>&1 &)
+            for t in 40 45 50 55; do sleep 5; trace="$trace walk$t=$(pose)"; done
+            echo "::notice::$r base x,y,z: $trace"
+            rtf=$(timeout 5 gz stats -p -d 2 2>/dev/null | tail -n 1)
+            echo "::notice::$r gz stats (rtf, sim time, real time, paused): $rtf"
+            grep -iE "error|fail|Tron2HWSim|Switching|controller_spawner|Loaded|Started controllers" $log | grep -v "^\s*$" | head -n 8 | \
+              while IFS= read -r l; do echo "::warning::$r | ${l:0:300}"; done
+            kill -INT $pid 2>/dev/null; sleep 8
+            pkill -9 -f gzserver; pkill -9 -f gzclient; pkill -9 -f tron2_hw_node; sleep 2
           done
